@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');
+      body { font-family: 'Sarabun', sans-serif; }
+      .fade-in { animation: fadeIn 0.4s; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      .nav-item.active { background-color: #1e293b; border-left: 4px solid #3b82f6; }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f1f1; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+  </head>
+  <body class="bg-gray-100 h-screen overflow-hidden">
+
+    <div id="page-login" class="flex items-center justify-center h-full w-full bg-slate-100">
+      <div class="bg-white p-10 rounded-xl shadow-2xl w-full max-w-sm border-t-4 border-blue-600">
+        <div class="text-center mb-6">
+           <div class="flex justify-center mb-4 min-h-[8rem] items-center">
+             <img id="login-logo-img" src="" class="hidden h-32 w-auto object-contain hover:scale-105 transition duration-300">
+             <div id="login-logo-loader" class="text-blue-200"><i class="fas fa-circle-notch fa-spin text-4xl"></i></div>
+           </div>
+           <h2 class="text-2xl font-bold text-gray-800">ระบบบริหารจัดการสอบ<br>O-NET ม.6</h2>
+           <p class="text-gray-500 text-sm mt-2">เข้าสู่ระบบเพื่อดำเนินการ</p>
+        </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="mb-4">
+            <label class="block text-gray-700 text-sm font-bold mb-2">ชื่อผู้ใช้งาน</label>
+            <input type="text" name="username" required class="shadow w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Username">
+          </div>
+          <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">รหัสผ่าน</label>
+            <input type="password" name="password" required class="shadow w-full py-2 px-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="**********">
+          </div>
+          <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded transition">เข้าสู่ระบบ</button>
+        </form>
+        <div class="mt-6 text-center text-xs text-gray-400">© 2025 Copyright | พัฒนาโดย นายภัทรพล แก้วเสนา</div>
+      </div>
+    </div>
+
+    <div id="page-dashboard" class="hidden flex h-full w-full fade-in">
+      
+      <aside class="w-64 bg-slate-800 text-white flex flex-col shadow-2xl z-20">
+        <div class="p-6 border-b border-slate-700 text-center bg-slate-900">
+          <div class="flex justify-center mb-4 min-h-[6rem] items-center">
+              <img id="sidebar-logo" src="" class="max-h-28 w-auto object-contain hidden drop-shadow-md hover:drop-shadow-xl transition" alt="Logo">
+              <div id="sidebar-logo-loader" class="text-slate-600"><i class="fas fa-circle-notch fa-spin text-2xl"></i></div>
+          </div>
+          <div class="font-bold text-xl text-blue-400 tracking-wide">O-NET ม.6</div>
+          <div id="sidebar-user-role" class="text-xs text-slate-400 mt-2 bg-slate-800 py-1 rounded-full border border-slate-700">Role: ...</div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+          <div onclick="switchTab('tab-general', this)" class="nav-item active px-6 py-4 flex items-center gap-4 text-sm cursor-pointer border-l-4 border-transparent hover:bg-slate-700"><i class="fas fa-school w-5 text-center text-blue-400"></i> <span>ข้อมูลทั่วไป</span></div>
+          <div onclick="switchTab('tab-exam', this)" class="nav-item px-6 py-4 flex items-center gap-4 text-sm cursor-pointer border-l-4 border-transparent hover:bg-slate-700"><i class="fas fa-file-signature w-5 text-center text-green-400"></i> <span>รายละเอียดสนามสอบ</span></div>
+          <div onclick="switchTab('tab-budget', this)" class="nav-item px-6 py-4 flex items-center gap-4 text-sm cursor-pointer border-l-4 border-transparent hover:bg-slate-700"><i class="fas fa-coins w-5 text-center text-yellow-400"></i> <span>ค่าใช้จ่ายสนามสอบ</span></div>
+          <div onclick="switchTab('tab-docs', this)" class="nav-item px-6 py-4 flex items-center gap-4 text-sm cursor-pointer border-l-4 border-transparent hover:bg-slate-700"><i class="fas fa-folder-open w-5 text-center text-pink-400"></i> <span>เอกสาร/คู่มือ</span></div>
+          
+          <div id="menu-admin-group" class="hidden mt-6 pt-4 border-t border-slate-700">
+             <div class="px-6 text-xs text-slate-500 font-bold mb-3 uppercase tracking-wider">Administrator</div>
+             <div onclick="switchTab('tab-users', this)" class="nav-item px-6 py-3 flex items-center gap-4 text-sm text-gray-300 hover:text-white cursor-pointer hover:bg-slate-700"><i class="fas fa-users-cog w-5 text-center"></i> <span>จัดการผู้ใช้</span></div>
+             <div onclick="switchTab('tab-settings', this)" class="nav-item px-6 py-3 flex items-center gap-4 text-sm text-gray-300 hover:text-white cursor-pointer hover:bg-slate-700"><i class="fas fa-cogs w-5 text-center"></i> <span>ตั้งค่าระบบ</span></div>
+          </div>
+        </nav>
+        <div class="p-4 bg-slate-900 border-t border-slate-700 flex items-center gap-3">
+           <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold"><i class="fas fa-user"></i></div>
+           <div class="flex-1 min-w-0"><p id="sidebar-user-name" class="text-sm font-medium truncate">User</p><p class="text-xs text-green-400 flex items-center gap-1"><span class="w-2 h-2 bg-green-500 rounded-full"></span> Online</p></div>
+           <button onclick="logout()" class="text-slate-400 hover:text-red-400 transition" title="Logout"><i class="fas fa-sign-out-alt text-lg"></i></button>
+        </div>
+      </aside>
+
+      <main class="flex-1 flex flex-col bg-gray-50 h-full overflow-hidden">
+        
+        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-8 z-10">
+           <div>
+              <h1 id="page-title" class="text-2xl font-bold text-slate-800">ข้อมูลทั่วไปสถานศึกษา</h1>
+              </div>
+           <button onclick="refreshCurrentData()" class="text-blue-600 hover:text-white hover:bg-blue-600 transition text-sm flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-blue-200 shadow-sm"><i class="fas fa-sync-alt"></i> อัปเดตข้อมูล</button>
+        </header>
+
+        <div class="flex-1 overflow-auto p-8 relative">
+           <div id="tab-general" class="content-section block fade-in"><div id="general-info-display" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto"></div></div>
+           <div id="tab-exam" class="content-section hidden fade-in"><div class="max-w-6xl mx-auto"><div id="exam-loading" class="text-center py-10 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-2"></i><br>กำลังประมวลผลข้อมูล...</div><div id="exam-content" class="hidden"></div></div></div>
+           <div id="tab-budget" class="content-section hidden fade-in"><div class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden"><div class="p-6 border-b flex justify-between items-center bg-gray-50"><h3 class="font-bold text-gray-700"><i class="fas fa-coins text-yellow-500 mr-2"></i> ข้อมูลค่าใช้จ่ายสนามสอบ</h3><div id="budget-summary-box" class="text-right"><span class="text-sm text-gray-500">ยอดรวม</span><div class="text-2xl font-bold text-green-600" id="budget-total">0.00 บาท</div></div></div><div id="budget-content-area" class="overflow-x-auto"></div></div></div>
+           <div id="tab-docs" class="content-section hidden fade-in"><div class="max-w-5xl mx-auto bg-white rounded-xl shadow-sm p-8"><div class="flex justify-between items-center mb-6 border-b pb-4"><h3 class="text-xl font-bold text-gray-700"><i class="fas fa-folder-open text-pink-500 mr-2"></i> คลังเอกสารและคู่มือ</h3><button id="btn-add-doc" onclick="openAddDocModal()" class="hidden bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded text-sm shadow transition"><i class="fas fa-plus"></i> เพิ่มเอกสารใหม่</button></div><div id="docs-list" class="space-y-4"></div></div></div>
+           
+           <div id="tab-users" class="content-section hidden fade-in"><div class="max-w-6xl mx-auto bg-white rounded-xl shadow-sm p-6"><div class="flex justify-between items-center mb-6"><h3 class="text-xl font-bold text-gray-700"><i class="fas fa-users-cog"></i> จัดการรายชื่อผู้ใช้</h3><button onclick="openAddUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm shadow"><i class="fas fa-plus"></i> เพิ่มผู้ใช้ใหม่</button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200 border"><thead class="bg-gray-100"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ชื่อหน่วยงาน</th><th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Role</th><th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Filter ID</th><th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Action</th></tr></thead><tbody id="users-tbody" class="bg-white divide-y divide-gray-200 text-sm"><tr><td colspan="5" class="text-center py-4 text-gray-400">Loading...</td></tr></tbody></table></div></div></div>
+           
+           <div id="tab-settings" class="content-section hidden fade-in"><div class="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-8"><h3 class="text-xl font-bold text-gray-700 mb-6 border-b pb-4"><i class="fas fa-cogs"></i> ตั้งค่าระบบ</h3><form id="settingsForm" onsubmit="saveSettings(event)"><div id="settings-container" class="space-y-4 text-center text-gray-400">Loading settings...</div><div class="mt-8 text-right"><button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-bold shadow">บันทึกการตั้งค่า</button></div></form></div></div>
+        </div>
+        <footer class="bg-gray-200 text-center py-2 text-xs text-gray-500 border-t border-gray-300">© 2025 Copyright | พัฒนาโดย นายภัทรพล แก้วเสนา ศึกษานิเทศก์ สพม.พิษณุโลก อุตรดิตถ์</footer>
+      </main>
+    </div>
+
+    <script>
+      let CURRENT_USER = null;
+      let CURRENT_TAB = 'tab-general';
+
+      window.onload = function() { loadSystemLogo(); };
+
+      function handleLogin(e) {
+        e.preventDefault();
+        var btn = document.getElementById('btnLogin'); var originalText = btn.innerText;
+        btn.innerText = 'Processing...'; btn.disabled = true; 
+        google.script.run.withSuccessHandler(res => {
+            btn.innerText = originalText; btn.disabled = false;
+            if (res.status === 'success') { CURRENT_USER = res; initDashboard(res); } 
+            else { Swal.fire('เข้าสู่ระบบไม่สำเร็จ', res.message, 'error'); }
+        }).userLogin(document.getElementById('loginForm'));
+      }
+
+      function initDashboard(userData) {
+         document.getElementById('page-login').classList.add('hidden');
+         document.getElementById('page-dashboard').classList.remove('hidden');
+         Swal.fire({ icon: 'success', title: 'ยินดีต้อนรับ', html: `คุณ <b>${userData.name}</b><br>เข้าสู่ระบบในฐานะ <span class="bg-blue-100 text-blue-800 px-2 rounded font-bold uppercase">${userData.role}</span>`, timer: 2000, showConfirmButton: false });
+         document.getElementById('sidebar-user-name').innerText = userData.name;
+         document.getElementById('sidebar-user-role').innerText = 'Role: ' + userData.role.toUpperCase();
+         if(userData.role === 'admin') {
+             document.getElementById('menu-admin-group').classList.remove('hidden');
+             document.getElementById('btn-add-doc').classList.remove('hidden');
+         }
+         loadGeneralInfo();
+      }
+
+      function loadSystemLogo() {
+          google.script.run.withSuccessHandler(res => {
+              if(res.status === 'success') {
+                  const logoSetting = res.settings.find(s => s.key === 'Logo_URL');
+                  if(logoSetting && logoSetting.value) {
+                      const imgLogin = document.getElementById('login-logo-img');
+                      imgLogin.onload = function() { document.getElementById('login-logo-loader').classList.add('hidden'); imgLogin.classList.remove('hidden'); };
+                      imgLogin.src = logoSetting.value;
+                      const imgSidebar = document.getElementById('sidebar-logo');
+                      imgSidebar.onload = function() { document.getElementById('sidebar-logo-loader').classList.add('hidden'); imgSidebar.classList.remove('hidden'); };
+                      imgSidebar.src = logoSetting.value;
+                  }
+              }
+          }).getSystemSettings();
+      }
+
+      function logout() { Swal.fire({ title: 'ยืนยันออกจากระบบ?', icon: 'warning', showCancelButton: true, confirmButtonText: 'Yes' }).then((res) => { if(res.isConfirmed) { document.getElementById('page-dashboard').classList.add('hidden'); document.getElementById('page-login').classList.remove('hidden'); document.getElementById('loginForm').reset(); CURRENT_USER = null; } }); }
+      function switchTab(tabId, el) { CURRENT_TAB = tabId; document.querySelectorAll('.content-section').forEach(d => d.classList.add('hidden')); document.getElementById(tabId).classList.remove('hidden'); if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); } let titles = {'tab-general':'ข้อมูลทั่วไป', 'tab-exam':'รายละเอียดสนามสอบ', 'tab-budget':'ค่าใช้จ่าย', 'tab-docs':'เอกสาร', 'tab-users':'จัดการผู้ใช้', 'tab-settings':'ตั้งค่าระบบ'}; document.getElementById('page-title').innerText = titles[tabId] || 'Dashboard'; if(tabId === 'tab-general') loadGeneralInfo(); if(tabId === 'tab-exam') loadExamDetails(); if(tabId === 'tab-budget') loadBudgetDetails(); if(tabId === 'tab-docs') loadDocuments(); if(tabId === 'tab-users') loadUsers(); if(tabId === 'tab-settings') loadSettings(); }
+
+      function loadGeneralInfo() {
+         var d = document.getElementById('general-info-display'); d.innerHTML = '<div class="col-span-2 text-center text-gray-400 py-10">Loading...</div>';
+         if (CURRENT_USER.role === 'admin') {
+             google.script.run.withSuccessHandler(res => { if (res.status === 'success') { d.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-600 flex justify-between"><div><p class="text-gray-500 font-bold uppercase">โรงเรียนในสังกัด</p><h3 class="text-4xl font-bold mt-2">${res.schools} แห่ง</h3></div><i class="fas fa-school text-blue-200 text-4xl"></i></div><div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-indigo-600 flex justify-between"><div><p class="text-gray-500 font-bold uppercase">นักเรียนที่เข้าสอบ</p><h3 class="text-4xl font-bold mt-2">${res.students.toLocaleString()} คน</h3></div><i class="fas fa-user-graduate text-indigo-200 text-4xl"></i></div><div class="col-span-1 md:col-span-2 bg-gradient-to-r from-green-500 to-teal-500 p-6 rounded-xl shadow text-white flex justify-between items-center"><div><p class="text-green-100 font-bold uppercase">งบประมาณดำเนินการสอบ</p><h3 class="text-4xl font-bold mt-2">฿ ${res.budget.toLocaleString()}</h3></div><i class="fas fa-wallet text-5xl opacity-30"></i></div>`; } else { d.innerHTML = `<div class="text-red-500">${res.message}</div>`; } }).getAdminStats();
+         } else {
+             google.script.run.withSuccessHandler(res => { if(res.status === 'success') { d.innerHTML = `<div class="bg-blue-50 p-6 rounded border-l-4 border-blue-600"><div class="text-sm text-gray-500">รหัสโรงเรียน</div><div class="text-2xl font-bold text-blue-800">${res.id}</div></div><div class="bg-blue-50 p-6 rounded border-l-4 border-blue-600"><div class="text-sm text-gray-500">ชื่อโรงเรียน</div><div class="text-2xl font-bold text-blue-800">${res.name}</div></div><div class="bg-white p-6 border rounded shadow-sm"><div class="text-sm text-gray-500">ผอ.</div><div class="text-xl">${res.director}</div></div><div class="bg-white p-6 border rounded shadow-sm"><div class="text-sm text-gray-500">โทร</div><div class="text-xl">${res.phone}</div></div>`; } else { d.innerHTML = `<div class="text-red-500">${res.message}</div>`; } }).getSchoolData(CURRENT_USER.filterId);
+         }
+      }
+      function loadExamDetails() { document.getElementById('exam-loading').classList.remove('hidden'); var content = document.getElementById('exam-content'); content.className = 'hidden'; if (CURRENT_USER.role === 'admin') { google.script.run.withSuccessHandler(res => { document.getElementById('exam-loading').classList.add('hidden'); content.classList.remove('hidden'); if (res.status === 'success') { let rows = res.data.map((r,i) => `<tr class="border-b hover:bg-gray-50"><td class="px-6 py-4 text-center text-gray-500">${i+1}</td><td class="px-6 py-4 font-bold text-gray-700">${r.name}<div class="text-xs text-gray-400">${r.id}</div></td><td class="px-6 py-4 text-center text-purple-600 font-bold">${r.rooms}</td><td class="px-6 py-4 text-center text-blue-600 font-bold">${r.students}</td><td class="px-6 py-4 text-center text-orange-600 font-bold">${r.teachers}</td></tr>`).join(''); content.innerHTML = `<div class="bg-white rounded-xl shadow-sm border overflow-hidden"><table class="min-w-full"><thead class="bg-gray-100 text-xs uppercase font-bold text-gray-600"><tr><th class="px-6 py-3 text-center">#</th><th class="px-6 py-3 text-left">โรงเรียน</th><th class="px-6 py-3 text-center">ห้องสอบ</th><th class="px-6 py-3 text-center">นักเรียน</th><th class="px-6 py-3 text-center">กรรมการ</th></tr></thead><tbody class="bg-white">${rows}</tbody></table></div>`; } }).getAllExamDetailsForAdminTable(); } else { content.className = "hidden grid grid-cols-1 md:grid-cols-3 gap-6"; content.innerHTML = `<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex justify-between"><div><p class="text-sm text-gray-500">ห้องสอบ</p><h3 class="text-3xl font-bold" id="ex-rooms">-</h3></div><i class="fas fa-door-open text-3xl text-purple-200"></i></div><div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500 flex justify-between"><div><p class="text-sm text-gray-500">นักเรียน</p><h3 class="text-3xl font-bold" id="ex-students">-</h3></div><i class="fas fa-user-graduate text-3xl text-blue-200"></i></div><div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-orange-500 flex justify-between"><div><p class="text-sm text-gray-500">กรรมการ</p><h3 class="text-3xl font-bold" id="ex-teachers">-</h3></div><i class="fas fa-chalkboard-teacher text-3xl text-orange-200"></i></div><div class="md:col-span-3 bg-white p-6 rounded-xl shadow-sm border"><h4 class="font-bold mb-2">สเปคคอมพิวเตอร์</h4><div class="bg-gray-50 p-4 rounded border text-sm" id="ex-spec">-</div></div>`; google.script.run.withSuccessHandler(res => { document.getElementById('exam-loading').classList.add('hidden'); content.classList.remove('hidden'); if(res.status==='success') { document.getElementById('ex-rooms').innerText = res.rooms; document.getElementById('ex-students').innerText = res.students; document.getElementById('ex-teachers').innerText = res.teachers; document.getElementById('ex-spec').innerText = res.spec; } }).getExamDetails(CURRENT_USER.filterId); } }
+      function loadBudgetDetails() { var contentArea = document.getElementById('budget-content-area'); contentArea.innerHTML = '<div class="text-center py-10 text-gray-400">Loading...</div>'; if (CURRENT_USER.role === 'admin') { document.getElementById('budget-summary-box').classList.add('hidden'); google.script.run.withSuccessHandler(res => { if(res.status==='success') { let rows = res.data.map((r, i) => `<tr class="hover:bg-gray-50 border-b"><td class="px-6 py-4 text-center text-gray-500">${i+1}</td><td class="px-6 py-4 font-bold text-gray-700">${r.name}<div class="text-xs text-gray-400">ID: ${r.id}</div></td><td class="px-6 py-4 text-center text-blue-600">${r.count} รายการ</td><td class="px-6 py-4 text-right font-mono font-bold text-green-600">${r.total.toLocaleString()}</td></tr>`).join(''); contentArea.innerHTML = `<table class="min-w-full text-sm"><thead class="bg-gray-100 text-xs uppercase font-bold text-gray-600"><tr><th class="px-6 py-3 text-center">#</th><th class="px-6 py-3 text-left">โรงเรียน</th><th class="px-6 py-3 text-center">รายการ</th><th class="px-6 py-3 text-right">ยอดรวม (บาท)</th></tr></thead><tbody class="bg-white">${rows}</tbody></table>`; } }).getAllBudgetsForAdminTable(); } else { document.getElementById('budget-summary-box').classList.remove('hidden'); google.script.run.withSuccessHandler(res => { if(res.status==='success') { let rows = res.items.map(i => `<tr><td class="px-6 py-4">${i.item}</td><td class="px-6 py-4 text-right">${i.amount.toLocaleString()}</td><td class="px-6 py-4 text-center"><span class="bg-gray-100 px-2 rounded text-xs">${i.status}</span></td><td class="px-6 py-4 text-gray-500 text-xs">${i.remark}</td></tr>`).join(''); contentArea.innerHTML = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-100"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">รายการ</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">จำนวน</th><th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">สถานะ</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">หมายเหตุ</th></tr></thead><tbody class="bg-white divide-y divide-gray-200 text-sm">${rows || '<tr><td colspan="4" class="text-center py-4">No Data</td></tr>'}</tbody></table>`; document.getElementById('budget-total').innerText = res.total.toLocaleString() + ' บาท'; } }).getBudgetDetails(CURRENT_USER.filterId); } }
+      function loadDocuments() { var list = document.getElementById('docs-list'); list.innerHTML = 'Loading...'; google.script.run.withSuccessHandler(res => { if(res.status==='success') { if(res.items.length === 0) { list.innerHTML = '<div class="text-center text-gray-400 py-10">ไม่พบเอกสารในระบบ</div>'; return; } list.innerHTML = res.items.map(d => { let deleteBtn = ''; if(CURRENT_USER.role === 'admin') { deleteBtn = `<button onclick="deleteDoc('${d.id}')" class="text-red-400 hover:text-red-600 ml-4"><i class="fas fa-trash"></i></button>`; } return `<div class="flex justify-between items-center p-4 bg-gray-50 border rounded hover:shadow transition"><div class="flex gap-4 items-center"><i class="fas fa-file-alt text-2xl text-pink-500"></i><div><div class="font-bold text-gray-800">${d.name}</div><div class="flex gap-2 mt-1"><span class="text-xs bg-gray-200 px-2 rounded">${d.category}</span><span class="text-xs bg-blue-100 text-blue-800 px-2 rounded border border-blue-200">For: ${d.target}</span></div></div></div><div class="flex items-center"><a href="${d.link}" target="_blank" class="text-blue-600 border border-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-600 hover:text-white transition">Download</a>${deleteBtn}</div></div>`; }).join(''); } else { list.innerHTML = 'Error loading docs'; } }).getDocuments(CURRENT_USER.role); }
+      function openAddDocModal() { Swal.fire({ title: '<span class="text-xl font-bold"><i class="fas fa-file-upload text-pink-500"></i> เพิ่มเอกสารใหม่</span>', html: `<div class="text-left mt-4 space-y-3 px-2"><div><label class="text-xs font-bold text-gray-500 uppercase">ชื่อเอกสาร</label><input id="d-name" class="w-full bg-gray-50 border rounded p-2" placeholder="เช่น คู่มือการสอบ"></div><div><label class="text-xs font-bold text-gray-500 uppercase">หมวดหมู่</label><select id="d-cat" class="w-full bg-gray-50 border rounded p-2"><option>คู่มือ</option><option>คำสั่ง</option><option>หนังสือราชการ</option><option>การเงิน</option></select></div><div><label class="text-xs font-bold text-gray-500 uppercase">ลิงค์เอกสาร (URL)</label><input id="d-link" class="w-full bg-gray-50 border rounded p-2" placeholder="https://drive.google.com/..."></div><div><label class="text-xs font-bold text-gray-500 uppercase">กลุ่มเป้าหมาย</label><select id="d-target" class="w-full bg-gray-50 border rounded p-2"><option value="all">ทั้งหมด (All)</option><option value="school">โรงเรียน (School)</option><option value="admin">เฉพาะ Admin</option></select></div></div>`, showCancelButton: true, confirmButtonText: 'บันทึก', confirmButtonColor: '#EC4899', preConfirm: () => { return { name: document.getElementById('d-name').value, category: document.getElementById('d-cat').value, link: document.getElementById('d-link').value, target: document.getElementById('d-target').value } } }).then((res) => { if(res.isConfirmed) { const d = res.value; if(!d.name || !d.link) return Swal.fire('Error', 'กรุณาใส่ชื่อและลิงค์', 'error'); Swal.fire({title:'Saving...', didOpen:()=>Swal.showLoading()}); google.script.run.withSuccessHandler(r => { if(r.status==='success'){ Swal.fire('Success','เพิ่มเอกสารแล้ว','success'); loadDocuments(); } }).addDocument(d); } }); }
+      function deleteDoc(id) { Swal.fire({ title: 'ลบเอกสารนี้?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33' }).then((r)=>{ if(r.isConfirmed) google.script.run.withSuccessHandler(res=>{ if(res.status==='success') { loadDocuments(); Swal.fire('Deleted','','success'); } }).deleteDocument(id); }); }
+      
+      // 🟢 [TAG: USERS TABLE]
+      function loadUsers() {
+         var tb = document.getElementById('users-tbody');
+         tb.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading...</td></tr>';
+         google.script.run.withSuccessHandler(res => {
+             if(res.status === 'success') {
+                 tb.innerHTML = res.users.map(u => {
+                    let statusBtn = u.status === 'Active' 
+                        ? `<button onclick="toggleStatus('${u.username}', 'Active')" class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-bold hover:bg-green-200">Active</button>`
+                        : `<button onclick="toggleStatus('${u.username}', 'Inactive')" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-bold hover:bg-red-200">Inactive</button>`;
+                    return `
+                    <tr class="hover:bg-gray-50 transition border-b">
+                       <td class="px-6 py-4 font-bold text-gray-700">${u.username}</td>
+                       <td class="px-6 py-4">${u.name}</td>
+                       <td class="px-6 py-4 text-center"><span class="px-2 py-1 rounded text-xs uppercase ${u.role==='admin'?'bg-purple-100 text-purple-800':'bg-blue-100 text-blue-800'}">${u.role}</span></td>
+                       <td class="px-6 py-4 text-center font-mono text-xs">${u.filterId}</td>
+                       <td class="px-6 py-4 text-center flex justify-center gap-2 items-center">
+                          ${statusBtn}
+                          <button onclick="deleteUser('${u.username}')" class="text-gray-400 hover:text-red-600"><i class="fas fa-trash"></i></button>
+                       </td>
+                    </tr>`;
+                 }).join('');
+             }
+         }).getAllUsers();
+      }
+
+      // 🟢 [TAG: TOGGLE CONFIRM] แจ้งเตือนก่อนเปลี่ยนสถานะ
+      function toggleStatus(username, current) {
+          let actionText = (current === 'Active') ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน';
+          let newStatus = (current === 'Active') ? 'Inactive' : 'Active';
+          let color = (current === 'Active') ? '#d33' : '#10B981';
+
+          Swal.fire({
+              title: `ยืนยันการ${actionText}?`,
+              text: `ต้องการเปลี่ยนสถานะของ ${username} เป็น ${newStatus} ใช่หรือไม่?`,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: color,
+              confirmButtonText: `ใช่, ${actionText}`,
+              cancelButtonText: 'ยกเลิก'
+          }).then((result) => {
+              if (result.isConfirmed) {
+                  Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
+                  google.script.run.withSuccessHandler(res => {
+                      if(res.status === 'success') { 
+                          loadUsers(); 
+                          Swal.fire('สำเร็จ!', `เปลี่ยนสถานะเป็น ${res.newStatus} แล้ว`, 'success'); 
+                      } else { 
+                          Swal.fire('Error', res.message, 'error'); 
+                      }
+                  }).toggleUserStatus(username, current);
+              }
+          });
+      }
+
+      function openAddUserModal() { Swal.fire({ title: '<span class="text-xl font-bold text-slate-700"><i class="fas fa-user-plus text-blue-600 mr-2"></i> เพิ่มผู้ใช้งานใหม่</span>', width: '600px', html: `<div class="text-left mt-4 space-y-4 px-2"><div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-gray-500 uppercase">Username</label><input id="new-user" class="w-full bg-gray-50 border rounded-lg p-2.5 shadow-sm"></div><div><label class="block text-xs font-bold text-gray-500 uppercase">Password</label><input id="new-pass" type="password" class="w-full bg-gray-50 border rounded-lg p-2.5 shadow-sm"></div></div><div><label class="block text-xs font-bold text-gray-500 uppercase">ชื่อหน่วยงาน / โรงเรียน</label><input id="new-name" class="w-full bg-gray-50 border rounded-lg p-2.5 shadow-sm"></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-xs font-bold text-gray-500 uppercase">Role</label><select id="new-role" class="w-full bg-gray-50 border rounded-lg p-2.5 shadow-sm"><option value="school">School</option><option value="admin">Admin</option></select></div><div><label class="block text-xs font-bold text-gray-500 uppercase">Filter ID</label><input id="new-fid" class="w-full bg-gray-50 border rounded-lg p-2.5 shadow-sm" placeholder="Ex. 001"></div></div></div>`, showCancelButton: true, confirmButtonText: 'บันทึกข้อมูล', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#2563EB', preConfirm: () => { return { username: document.getElementById('new-user').value, password: document.getElementById('new-pass').value, name: document.getElementById('new-name').value, role: document.getElementById('new-role').value, filterId: document.getElementById('new-fid').value } } }).then((result) => { if(result.isConfirmed) { const u = result.value; if(!u.username || !u.password || !u.name || !u.filterId) { Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกให้ครบ', 'warning').then(()=>openAddUserModal()); return; } Swal.fire({title: 'Saving...', didOpen: () => Swal.showLoading()}); google.script.run.withSuccessHandler(res => { if(res.status==='success') { Swal.fire('Success', 'บันทึกเรียบร้อย', 'success'); loadUsers(); } else { Swal.fire('Error', res.message, 'error'); } }).addUser(u); } }); }
+      function deleteUser(username) { Swal.fire({ title: `ลบผู้ใช้ ${username}?`, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบเลย' }).then((res) => { if(res.isConfirmed) google.script.run.withSuccessHandler(r => { if(r.status==='success') { loadUsers(); Swal.fire('Deleted!', '', 'success'); } }).deleteUser(username); }); }
+      function loadSettings() { var container = document.getElementById('settings-container'); container.innerHTML = 'Loading...'; google.script.run.withSuccessHandler(res => { if(res.status === 'success') { let html = res.settings.map(s => `<div class="flex items-center justify-between bg-gray-50 p-3 rounded border"><div class="font-bold text-gray-700 w-1/3">${s.key}</div><input type="text" name="${s.key}" value="${s.value}" class="w-2/3 p-2 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500"></div>`).join(''); container.innerHTML = html; } }).getSystemSettings(); }
+      function saveSettings(e) { e.preventDefault(); var inputs = document.getElementById('settingsForm').querySelectorAll('input'); var settingsData = []; inputs.forEach(input => { settingsData.push({ key: input.name, value: input.value }); }); google.script.run.withSuccessHandler(res => { if(res.status === 'success') { Swal.fire('Saved', 'บันทึกเรียบร้อย', 'success'); loadSystemLogo(); } }).saveSystemSettings(settingsData); }
+      function refreshCurrentData() { switchTab(CURRENT_TAB); const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 }); Toast.fire({ icon: 'success', title: 'Refreshed' }); }
+    </script>
+  </body>
+</html>
